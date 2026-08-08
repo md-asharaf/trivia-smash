@@ -4,14 +4,13 @@ import { InstancedMesh, Object3D, Color } from 'three';
 import { SoundManager } from '../sound';
 
 interface BallsProps {
-  paddleXRef: React.MutableRefObject<number>;
+  paddlePosRef: React.MutableRefObject<{ x: number, z: number }>;
   onHitResult: (index: number) => void;
   isPaused?: boolean;
 }
 
-export default function Balls({ paddleXRef, onHitResult, isPaused }: BallsProps) {
+export default function Balls({ paddlePosRef, onHitResult, isPaused }: BallsProps) {
   const startZ = -6;
-  const targetZ = 6;
   const speed = 6; // Units per second in Z direction
   const positions = [-3.5, -1.2, 1.2, 3.5];
   const floorY = 0.4; // Table Y (0.2) + Ball radius (0.2)
@@ -79,36 +78,33 @@ export default function Balls({ paddleXRef, onHitResult, isPaused }: BallsProps)
 
     if (phase === 'serve') {
       let nextZ = ballZ + speed * delta;
+      const currentTargetZ = paddlePosRef.current.z;
 
-      // Check if reached player paddle
-      if (nextZ >= targetZ) {
-        nextZ = targetZ;
+      let hit = -1;
 
-        // Detect hit
-        const px = paddleXRef.current;
-        let hit = -1;
+      if (nextZ >= currentTargetZ - 0.6 && nextZ <= currentTargetZ + 0.6) {
+        const px = paddlePosRef.current.x;
         for (let i = 0; i < positions.length; i++) {
           if (Math.abs(px - positions[i]) < 1.0) {
             hit = i;
             break;
           }
         }
+      }
 
+      if (hit !== -1) {
+        nextZ = currentTargetZ;
         setHitIndex(hit);
-        if (hit !== -1) {
-          SoundManager.playHit();
-          setPhase('return');
-        } else {
-          // Missed all balls
-          setPhase('ended');
-          onHitResult(-1);
-        }
+        SoundManager.playHit();
+        setPhase('return');
+      } else if (nextZ >= 7.5) {
+        setPhase('ended');
+        onHitResult(-1);
       } else {
         checkBounce(ballZ, nextZ);
         setBallZ(nextZ);
       }
 
-      // Update instanced mesh for serve phase
       if (meshRef.current) {
         for (let i = 0; i < positions.length; i++) {
           const y = getServeY(nextZ);
@@ -119,7 +115,7 @@ export default function Balls({ paddleXRef, onHitResult, isPaused }: BallsProps)
         meshRef.current.instanceMatrix.needsUpdate = true;
       }
     } else if (phase === 'return') {
-      let nextZ = ballZ - speed * delta * 1.5; // Return is slightly faster
+      let nextZ = ballZ - speed * delta * 1.5;
 
       if (nextZ <= startZ) {
         nextZ = startZ;
@@ -130,20 +126,18 @@ export default function Balls({ paddleXRef, onHitResult, isPaused }: BallsProps)
         setBallZ(nextZ);
       }
 
-      // Update instanced mesh for return phase
       if (meshRef.current) {
         for (let i = 0; i < positions.length; i++) {
           if (i === hitIndex) {
-            // Only the hit ball returns
             const y = getReturnY(nextZ);
             dummy.position.set(positions[i], y, nextZ);
             dummy.updateMatrix();
             meshRef.current.setMatrixAt(i, dummy.matrix);
           } else {
-            // Other balls simulate falling off the table
-            const t = (targetZ - nextZ) / (speed * 1.5);
+            const currentTargetZ = paddlePosRef.current.z;
+            const t = (currentTargetZ - nextZ) / (speed * 1.5);
             const dropY = floorY - 9.8 * t * t * 0.5;
-            dummy.position.set(positions[i], dropY, targetZ + t * speed * 0.5);
+            dummy.position.set(positions[i], dropY, currentTargetZ + t * speed * 0.5);
             dummy.updateMatrix();
             meshRef.current.setMatrixAt(i, dummy.matrix);
           }

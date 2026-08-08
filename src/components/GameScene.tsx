@@ -13,10 +13,10 @@ interface GameSceneProps {
 }
 
 export function GameScene({ question, onAnswer, isPaused }: GameSceneProps) {
-  const paddleXRef = useRef(0);
+  const paddlePosRef = useRef({ x: 0, z: 6 });
 
-  const handlePaddleUpdate = (x: number) => {
-    paddleXRef.current = x;
+  const handlePaddleUpdate = (pos: { x: number, z: number }) => {
+    paddlePosRef.current = pos;
   };
 
   return (
@@ -41,7 +41,7 @@ export function GameScene({ question, onAnswer, isPaused }: GameSceneProps) {
 
       <PlayerPaddle onPositionUpdate={handlePaddleUpdate} isPaused={isPaused} />
 
-      <Balls paddleXRef={paddleXRef} onHitResult={onAnswer} isPaused={isPaused} />
+      <Balls paddlePosRef={paddlePosRef} onHitResult={onAnswer} isPaused={isPaused} />
     </>
   );
 }
