@@ -1,0 +1,152 @@
+[
+  {
+    "country": "Afghanistan",
+    "airline": "Ariana Afghan Airlines",
+    "abbreviation": "AAA"
+  },
+  {
+    "country": "Australia",
+    "airline": "Queensland and Northern Territory Aerial Service",
+    "abbreviation": "Qantas"
+  },
+  {
+    "country": "Belgium",
+    "airline": "National Belgium Airlines",
+    "abbreviation": "Sabera"
+  },
+  {
+    "country": "East Africa",
+    "airline": "East African Airways",
+    "abbreviation": "Sabena"
+  },
+  {
+    "country": "France",
+    "airline": "Air France",
+    "abbreviation": "Af"
+  },
+  {
+    "country": "Greece",
+    "airline": "Olympic Airways",
+    "abbreviation": "Oa"
+  },
+  {
+    "country": "Hong Kong",
+    "airline": "Cathay pacific Airways",
+    "abbreviation": "Cpa"
+  },
+  {
+    "country": "Hungary",
+    "airline": "Hungarian Airlines",
+    "abbreviation": "Malev"
+  },
+  {
+    "country": "India",
+    "airline": "Air India",
+    "abbreviation": "Al"
+  },
+  {
+    "country": "Indonesia",
+    "airline": "Garuda Indonesian Airways",
+    "abbreviation": "GIA"
+  },
+  {
+    "country": "Iran",
+    "airline": "Iran Air",
+    "abbreviation": "IA"
+  },
+  {
+    "country": "Ireland",
+    "airline": "Irish International Airlines",
+    "abbreviation": "Aer Lignus"
+  },
+  {
+    "country": "Israel",
+    "airline": "EI AL",
+    "abbreviation": "EI AI"
+  },
+  {
+    "country": "Italy",
+    "airline": "Italian",
+    "abbreviation": "Alitalia"
+  },
+  {
+    "country": "Japan",
+    "airline": "Japan Airlines",
+    "abbreviation": "Full"
+  },
+  {
+    "country": "Kuwait",
+    "airline": "Kuwait Airlines",
+    "abbreviation": "KA"
+  },
+  {
+    "country": "Lebanon",
+    "airline": "Middle East Airlines",
+    "abbreviation": "Mea"
+  },
+  {
+    "country": "Nepal",
+    "airline": "Royal Nepal Airlines Corp",
+    "abbreviation": "RNAC"
+  },
+  {
+    "country": "Netherlands",
+    "airline": "KLM Royal dutch airlines",
+    "abbreviation": "KLM"
+  },
+  {
+    "country": "Pakistan",
+    "airline": "Pakistan International Airlines",
+    "abbreviation": "PIA"
+  },
+  {
+    "country": "Philippines",
+    "airline": "Philippines Airlines",
+    "abbreviation": "PAL"
+  },
+  {
+    "country": "Poland",
+    "airline": "Polish State Air Service",
+    "abbreviation": "Lot"
+  },
+  {
+    "country": "Romania",
+    "airline": "Transporturi Aerine Romane",
+    "abbreviation": "TAROM"
+  },
+  {
+    "country": "Scandinavia",
+    "airline": "Scandinavian Air System",
+    "abbreviation": "SAS"
+  },
+  {
+    "country": "Singapore",
+    "airline": "Singapore Airline",
+    "abbreviation": "SIA"
+  },
+  {
+    "country": "Russia",
+    "airline": "Aeroflot",
+    "abbreviation": "Aeroflot"
+  },
+  {
+    "country": "Sri Lanka",
+    "airline": "Air Lanka",
+    "abbreviation": "AL"
+  },
+  {
+    "country": "Switzerland",
+    "airline": "Swiss Air",
+    "abbreviation": "Swissair"
+  },
+  {
+    "country": "United Kingdom",
+    "airline": "British Airways",
+    "abbreviation": "BA"
+  },
+  {
+    "country": "United States of America",
+    "airline": "Pan American Airways",
+    "abbreviation": "PANAM"
+  }
+]
