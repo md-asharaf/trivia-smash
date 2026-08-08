@@ -10,9 +10,10 @@ interface GameSceneProps {
   question: Question;
   onAnswer: (selectedIndex: number) => void;
   isPaused?: boolean;
+  isGameOver?: boolean;
 }
 
-export function GameScene({ question, onAnswer, isPaused }: GameSceneProps) {
+export function GameScene({ question, onAnswer, isPaused, isGameOver }: GameSceneProps) {
   const paddlePosRef = useRef({ x: 0, z: 6, vz: 0 });
 
   const handlePaddleUpdate = (pos: { x: number, z: number, vz: number }) => {
@@ -37,7 +38,7 @@ export function GameScene({ question, onAnswer, isPaused }: GameSceneProps) {
 
       <Table />
 
-      <Opponents options={question.options} />
+      <Opponents options={question.options} isGameOver={isGameOver} />
 
       <PlayerPaddle onPositionUpdate={handlePaddleUpdate} isPaused={isPaused} />
 

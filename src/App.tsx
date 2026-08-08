@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { Trophy, Gem, Pause, Play, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 import { GameScene } from './components/GameScene';
 import { generateQuestions, Question } from './gameLogic';
-import rawData from '../public/data.json';
+import rawData from './public/data.json';
 import { SoundManager } from './sound';
 import confetti from 'canvas-confetti';
 
@@ -48,7 +48,7 @@ function App() {
         return newStreak;
       });
       SoundManager.playWin();
-      triggerConfetti();
+      triggerWinConfetti();
     } else {
       setScore(s => Math.max(0, s - 5));
       setStreak(0);
@@ -60,31 +60,40 @@ function App() {
           return i + 1;
         } else {
           setIsGameOver(true);
-          triggerConfetti(); // Big explosion for finishing!
+          triggerGameOverConfetti();
           return i;
         }
       });
     }, 1000);
   }, [questions, currentQuestionIndex]);
 
-  const triggerConfetti = () => {
+  const triggerWinConfetti = () => {
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      origin: { y: 0.8 },
+      colors: ['#fbbf24', '#38bdf8', '#4ade80']
+    });
+  };
+
+  const triggerGameOverConfetti = () => {
     const duration = 2000;
     const end = Date.now() + duration;
 
     const frame = () => {
       confetti({
-        particleCount: 2,
+        particleCount: 4,
         angle: 60,
         spread: 55,
-        origin: { x: 0 },
-        colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff']
+        origin: { x: 0, y: 0.8 },
+        colors: ['#38bdf8', '#818cf8', '#c084fc', '#fbbf24']
       });
       confetti({
-        particleCount: 2,
+        particleCount: 4,
         angle: 120,
         spread: 55,
-        origin: { x: 1 },
-        colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff']
+        origin: { x: 1, y: 0.8 },
+        colors: ['#38bdf8', '#818cf8', '#c084fc', '#fbbf24']
       });
 
       if (Date.now() < end) {
@@ -151,6 +160,7 @@ function App() {
               question={currentQuestion}
               onAnswer={handleAnswer}
               isPaused={isPaused}
+              isGameOver={isGameOver}
               key={currentQuestionIndex}
             />
           </Canvas>

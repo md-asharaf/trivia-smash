@@ -3,9 +3,10 @@ import Paddle from './Paddle';
 
 interface OpponentsProps {
   options: string[];
+  isGameOver?: boolean;
 }
 
-export default function Opponents({ options }: OpponentsProps) {
+export default function Opponents({ options, isGameOver }: OpponentsProps) {
   const positions = [
     -3.5,
     -1.2,
@@ -23,11 +24,16 @@ export default function Opponents({ options }: OpponentsProps) {
             color={colors[index % colors.length]}
             rotation={[0, 0, -positions[index] * 0.25]}
           />
-          <Html position={[0, index % 2 === 0 ? 2.53 : 0.8, 0]} center>
-            <div className="option-label">
-              {option}
-            </div>
-          </Html>
+          {!isGameOver && (
+            <Html
+              position={[0, index % 2 === 0 ? 2.53 : 0.8, 0]}
+              center
+            >
+              <div className="option-label">
+                {option}
+              </div>
+            </Html>
+          )}
         </group>
       ))}
     </group>
