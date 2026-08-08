@@ -1,40 +1,39 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Trophy, Gem, Pause, Play, Volume2, VolumeX } from 'lucide-react';
+import { Trophy, Gem, Pause, Play, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 import { GameScene } from './components/GameScene';
 import { generateQuestions, Question } from './gameLogic';
 import rawData from '../public/data.json';
 import { SoundManager } from './sound';
 import confetti from 'canvas-confetti';
 
-type GameState = 'start' | 'playing' | 'gameover';
-
 function App() {
-  const [gameState, setGameState] = useState<GameState>('start');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isPaused, setIsPaused] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
     SoundManager.isMuted = isMuted;
   }, [isMuted]);
 
-  const startGame = useCallback(() => {
-    const newQuestions = generateQuestions(rawData, 10);
-    setQuestions(newQuestions);
+  useEffect(() => {
+    setQuestions(generateQuestions(rawData, 10));
+  }, []);
+
+  const resetGame = useCallback(() => {
+    setQuestions(generateQuestions(rawData, 10));
     setCurrentQuestionIndex(0);
     setScore(0);
     setStreak(0);
-    setGameState('playing');
+    setIsPaused(false);
   }, []);
 
   const handleAnswer = useCallback((selectedIndex: number) => {
-    if (gameState !== 'playing') return;
-
     const currentQuestion = questions[currentQuestionIndex];
+    if (!currentQuestion) return;
     const isCorrect = selectedIndex === currentQuestion.correctAnswerIndex;
 
     if (isCorrect) {
@@ -48,13 +47,16 @@ function App() {
       SoundManager.playLose();
     }
     setTimeout(() => {
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(i => i + 1);
-      } else {
-        setGameState('gameover');
-      }
+      setCurrentQuestionIndex(i => {
+        if (i < questions.length - 1) {
+          return i + 1;
+        } else {
+          setQuestions(generateQuestions(rawData, 10));
+          return 0;
+        }
+      });
     }, 1000);
-  }, [gameState, questions, currentQuestionIndex]);
+  }, [questions, currentQuestionIndex]);
 
   const triggerConfetti = () => {
     const duration = 2000;
@@ -88,7 +90,7 @@ function App() {
   return (
     <div className="game-container">
       <div className="top-ui">
-        {gameState === 'playing' && currentQuestion && (
+        {currentQuestion && (
           <>
             <div className="question-container">
               <h2 className="question-text">
@@ -96,6 +98,9 @@ function App() {
               </h2>
             </div>
             <div className="top-controls">
+              <button className="control-btn" onClick={resetGame} title="New Game">
+                <RotateCcw size={24} />
+              </button>
               <button className="control-btn" onClick={() => setIsPaused(!isPaused)}>
                 {isPaused ? <Play size={24} /> : <Pause size={24} />}
               </button>
@@ -108,22 +113,7 @@ function App() {
       </div>
 
       <div className="canvas-container">
-        {gameState === 'start' && (
-          <div className="start-screen">
-            <h1 className="title">TABLE TENNIS TRIVIA</h1>
-            <button className="play-button" onClick={startGame}>PLAY NOW</button>
-          </div>
-        )}
-
-        {gameState === 'gameover' && (
-          <div className="game-over-screen">
-            <h1 className="title">GAME OVER</h1>
-            <h2 style={{ fontSize: '3rem', marginBottom: '2rem' }}>Final Score: {score}</h2>
-            <button className="play-button" onClick={startGame}>PLAY AGAIN</button>
-          </div>
-        )}
-
-        {gameState === 'playing' && currentQuestion && (
+        {currentQuestion && (
           <Canvas shadows camera={{ position: [0, 8, 14], fov: 45 }}>
             <GameScene
               question={currentQuestion}
@@ -136,7 +126,7 @@ function App() {
       </div>
 
       <div className="bottom-ui">
-        {gameState === 'playing' && currentQuestion && (
+        {currentQuestion && (
           <div className="stats-container">
             <div className="stat-box">
               <Trophy className="score-icon" color="#fbbf24" />

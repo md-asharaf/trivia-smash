@@ -23,11 +23,11 @@ export default function Table() {
       </mesh>
 
       <mesh position={[0, 0.6, 0]}>
-        <boxGeometry args={[10.5, 1, 0.1]} />
+        <boxGeometry args={[10.2, 1, 0.1]} />
         <meshStandardMaterial color="#1a1a1a" transparent opacity={0.6} />
       </mesh>
       <mesh position={[0, 1.1, 0]}>
-        <boxGeometry args={[10.5, 0.1, 0.15]} />
+        <boxGeometry args={[10.2, 0.1, 0.15]} />
         <meshStandardMaterial color="white" />
       </mesh>
     </group>

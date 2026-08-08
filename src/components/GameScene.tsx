@@ -13,9 +13,9 @@ interface GameSceneProps {
 }
 
 export function GameScene({ question, onAnswer, isPaused }: GameSceneProps) {
-  const paddlePosRef = useRef({ x: 0, z: 6 });
+  const paddlePosRef = useRef({ x: 0, z: 6, vz: 0 });
 
-  const handlePaddleUpdate = (pos: { x: number, z: number }) => {
+  const handlePaddleUpdate = (pos: { x: number, z: number, vz: number }) => {
     paddlePosRef.current = pos;
   };
 

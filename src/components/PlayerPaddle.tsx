@@ -4,14 +4,16 @@ import { Group } from 'three';
 import Paddle from './Paddle';
 
 interface PlayerPaddleProps {
-  onPositionUpdate?: (pos: { x: number, z: number }) => void;
+  onPositionUpdate?: (pos: { x: number, z: number, vz: number }) => void;
   isPaused?: boolean;
 }
 
 export default function PlayerPaddle({ onPositionUpdate, isPaused }: PlayerPaddleProps) {
   const paddleRef = useRef<Group>(null);
+  const prevTargetZRef = useRef(6);
+  const smoothedVelocityZRef = useRef(0);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     if (!paddleRef.current || isPaused) return;
 
     let targetX = state.pointer.x * 6;
@@ -26,8 +28,16 @@ export default function PlayerPaddle({ onPositionUpdate, isPaused }: PlayerPaddl
     // Tilt paddle based on X position
     paddleRef.current.rotation.z = -paddleRef.current.position.x * 0.15;
 
+    const rawVelocity = delta > 0 ? (targetZ - prevTargetZRef.current) / delta : 0;
+    smoothedVelocityZRef.current += (rawVelocity - smoothedVelocityZRef.current) * 0.3;
+    prevTargetZRef.current = targetZ;
+
     if (onPositionUpdate) {
-      onPositionUpdate({ x: paddleRef.current.position.x, z: paddleRef.current.position.z });
+      onPositionUpdate({ 
+        x: paddleRef.current.position.x, 
+        z: paddleRef.current.position.z,
+        vz: smoothedVelocityZRef.current
+      });
     }
   });
 
