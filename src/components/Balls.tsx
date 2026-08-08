@@ -89,7 +89,7 @@ export default function Balls({ paddlePosRef, onHitResult, isPaused }: BallsProp
         // Dynamic hit calculation using exact mouse thrust power
         let bounceZ = -3;
         let timeToBounce = 0.8; // default time in air
-        
+
         if (paddlePower < -15) { // Smash (thrusting forward hard)
           bounceZ = -5.5;
           timeToBounce = 0.3; // Very fast
@@ -104,7 +104,7 @@ export default function Balls({ paddlePosRef, onHitResult, isPaused }: BallsProp
         const distZ = currentTargetZ - bounceZ;
         const requiredSpeed = distZ / timeToBounce;
         const speedMult = requiredSpeed / speed;
-        
+
         setReturnSpeedMult(speedMult);
         SoundManager.playHit();
 
@@ -138,7 +138,7 @@ export default function Balls({ paddlePosRef, onHitResult, isPaused }: BallsProp
 
       if (nextY <= floorY && velocityYRef.current < 0) {
         nextY = floorY;
-        velocityYRef.current = Math.abs(velocityYRef.current) * 0.45; // Reduced bounce restitution for realistic ping pong feel
+        velocityYRef.current = Math.abs(velocityYRef.current) * 0.45;
         SoundManager.playBounce();
       }
       ballYRef.current = nextY;

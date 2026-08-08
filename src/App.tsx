@@ -16,6 +16,7 @@ function App() {
   const [isPaused, setIsPaused] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
 
   useEffect(() => {
     SoundManager.isMuted = isMuted;
@@ -107,7 +108,14 @@ function App() {
 
   return (
     <div className="game-container">
-      {!isGameOver && (
+      {!isCanvasLoaded && (
+        <div className="loading-screen">
+          <div className="loader"></div>
+          <h2>Loading Game...</h2>
+        </div>
+      )}
+
+      {!isGameOver && isCanvasLoaded && (
         <div className="top-ui">
           {currentQuestion && (
             <>
@@ -155,7 +163,11 @@ function App() {
         )}
 
         {currentQuestion && (
-          <Canvas shadows camera={{ position: [0, 8, 14], fov: 45 }}>
+          <Canvas
+            shadows
+            camera={{ position: [0, 8, 14], fov: 45 }}
+            onCreated={() => setIsCanvasLoaded(true)}
+          >
             <GameScene
               question={currentQuestion}
               onAnswer={handleAnswer}
@@ -167,7 +179,7 @@ function App() {
         )}
       </div>
 
-      {!isGameOver && (
+      {!isGameOver && isCanvasLoaded && (
         <div className="bottom-ui">
           {currentQuestion && (
             <div className="stats-container">
