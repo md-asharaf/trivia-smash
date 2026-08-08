@@ -12,8 +12,10 @@ function App() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [maxStreak, setMaxStreak] = useState(0);
   const [isPaused, setIsPaused] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
 
   useEffect(() => {
     SoundManager.isMuted = isMuted;
@@ -28,7 +30,9 @@ function App() {
     setCurrentQuestionIndex(0);
     setScore(0);
     setStreak(0);
+    setMaxStreak(0);
     setIsPaused(false);
+    setIsGameOver(false);
   }, []);
 
   const handleAnswer = useCallback((selectedIndex: number) => {
@@ -38,7 +42,11 @@ function App() {
 
     if (isCorrect) {
       setScore(s => s + 10);
-      setStreak(s => s + 1);
+      setStreak(s => {
+        const newStreak = s + 1;
+        setMaxStreak(ms => Math.max(ms, newStreak));
+        return newStreak;
+      });
       SoundManager.playWin();
       triggerConfetti();
     } else {
@@ -51,8 +59,9 @@ function App() {
         if (i < questions.length - 1) {
           return i + 1;
         } else {
-          setQuestions(generateQuestions(rawData, 10));
-          return 0;
+          setIsGameOver(true);
+          triggerConfetti(); // Big explosion for finishing!
+          return i;
         }
       });
     }, 1000);
@@ -89,56 +98,81 @@ function App() {
 
   return (
     <div className="game-container">
-      <div className="top-ui">
-        {currentQuestion && (
-          <>
-            <div className="question-container">
-              <h2 className="question-text">
-                What is the airline of <span className="highlight">{currentQuestion.country}</span>?
-              </h2>
-            </div>
-            <div className="top-controls">
-              <button className="control-btn" onClick={resetGame} title="New Game">
-                <RotateCcw size={24} />
-              </button>
-              <button className="control-btn" onClick={() => setIsPaused(!isPaused)}>
-                {isPaused ? <Play size={24} /> : <Pause size={24} />}
-              </button>
-              <button className="control-btn" onClick={() => setIsMuted(!isMuted)}>
-                {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
+      {!isGameOver && (
+        <div className="top-ui">
+          {currentQuestion && (
+            <>
+              <div className="question-container">
+                <h2 className="question-text">
+                  What is the airline of <span className="highlight">{currentQuestion.country}</span>?
+                </h2>
+              </div>
+              <div className="top-controls">
+                <button className="control-btn" onClick={resetGame} title="New Game">
+                  <RotateCcw size={24} />
+                </button>
+                <button className="control-btn" onClick={() => setIsPaused(!isPaused)}>
+                  {isPaused ? <Play size={24} /> : <Pause size={24} />}
+                </button>
+                <button className="control-btn" onClick={() => setIsMuted(!isMuted)}>
+                  {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="canvas-container">
+        {isGameOver && (
+          <div className="game-over-overlay">
+            <div className="game-over-modal">
+              <h1 className="game-over-title">MATCH COMPLETE</h1>
+              <div className="game-over-stats">
+                <div className="go-stat">
+                  <span>FINAL SCORE</span>
+                  <h2 className="score-text">{score}</h2>
+                </div>
+                <div className="go-stat">
+                  <span>MAX STREAK</span>
+                  <h2 className="streak-text">
+                    {maxStreak} <Gem size={24} color="#38bdf8" style={{ display: 'inline', verticalAlign: 'middle', marginLeft: '4px' }} />
+                  </h2>
+                </div>
+              </div>
+              <button className="play-again-btn" onClick={resetGame}>PLAY AGAIN</button>
+            </div>
+          </div>
+        )}
+
         {currentQuestion && (
           <Canvas shadows camera={{ position: [0, 8, 14], fov: 45 }}>
             <GameScene
               question={currentQuestion}
               onAnswer={handleAnswer}
               isPaused={isPaused}
-              key={currentQuestionIndex} // Remount scene on new question
+              key={currentQuestionIndex}
             />
           </Canvas>
         )}
       </div>
 
-      <div className="bottom-ui">
-        {currentQuestion && (
-          <div className="stats-container">
-            <div className="stat-box">
-              <Trophy className="score-icon" color="#fbbf24" />
-              <span className="stat-value">{score}</span>
+      {!isGameOver && (
+        <div className="bottom-ui">
+          {currentQuestion && (
+            <div className="stats-container">
+              <div className="stat-box">
+                <Trophy className="score-icon" color="#fbbf24" />
+                <span className="stat-value">{score}</span>
+              </div>
+              <div className="stat-box" title="Answer Streak">
+                <Gem className="score-icon" color="#38bdf8" />
+                <span className="stat-value">{streak}</span>
+              </div>
             </div>
-            <div className="stat-box" title="Answer Streak">
-              <Gem className="score-icon" color="#38bdf8" />
-              <span className="stat-value">{streak}</span>
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
