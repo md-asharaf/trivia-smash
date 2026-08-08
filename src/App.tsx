@@ -130,7 +130,7 @@ function App() {
           <div className="stats-container">
             <div className="stat-box">
               <Trophy className="score-icon" color="#fbbf24" />
-              <span className="stat-value">{score.toString().padStart(2, '0')}</span>
+              <span className="stat-value">{score}</span>
             </div>
             <div className="stat-box" title="Answer Streak">
               <Gem className="score-icon" color="#38bdf8" />
