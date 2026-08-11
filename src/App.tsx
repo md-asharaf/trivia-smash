@@ -18,6 +18,7 @@ function App() {
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [feedback, setFeedback] = useState<{type: 'correct' | 'wrong', key: number} | null>(null);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -57,12 +58,15 @@ function App() {
       });
       SoundManager.playWin();
       triggerWinConfetti();
+      setFeedback({ type: 'correct', key: Date.now() });
     } else {
       setScore(s => Math.max(0, s - 5));
       setStreak(0);
       SoundManager.playLose();
+      setFeedback({ type: 'wrong', key: Date.now() });
     }
     setTimeout(() => {
+      setFeedback(null);
       setCurrentQuestionIndex(i => {
         if (i < questions.length - 1) {
           return i + 1;
@@ -122,6 +126,11 @@ function App() {
       )}
 
       <div className="canvas-container">
+        {feedback && (
+          <div key={feedback.key} className={`feedback-popup ${feedback.type}`}>
+            {feedback.type === 'correct' ? '+10 CORRECT!' : '-5 WRONG!'}
+          </div>
+        )}
         {isGameOver && (
           <div className="game-over-overlay">
             <div className="game-over-modal">

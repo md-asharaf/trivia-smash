@@ -424,3 +424,44 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+
+.feedback-popup {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Bangers', cursive;
+  font-size: clamp(2.5rem, 8vmin, 4.5rem);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  pointer-events: none;
+  z-index: 100;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  animation: popFeedback 1s ease-out forwards;
+}
+
+.feedback-popup.correct {
+  color: #4ade80; 
+}
+
+.feedback-popup.wrong {
+  color: #f43f5e;
+}
+
+@keyframes popFeedback {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -30%) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -70%) scale(0.9);
+  }
+}
