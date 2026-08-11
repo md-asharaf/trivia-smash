@@ -17,6 +17,13 @@ function App() {
   const [isMuted, setIsMuted] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isCanvasLoaded, setIsCanvasLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     SoundManager.isMuted = isMuted;
@@ -165,7 +172,10 @@ function App() {
         {currentQuestion && (
           <Canvas
             shadows
-            camera={{ position: [0, 8, 14], fov: 45 }}
+            camera={{ 
+              position: isMobile ? [0, 16, 14] : [0, 9, 16], 
+              fov: isMobile ? 65 : 48 
+            }}
             onCreated={() => setIsCanvasLoaded(true)}
           >
             <GameScene
