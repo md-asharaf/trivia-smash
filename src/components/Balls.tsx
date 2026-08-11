@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { InstancedMesh, Object3D, Color } from 'three';
 import { SoundManager } from '../sound';
@@ -15,11 +15,11 @@ export default function Balls({ paddlePosRef, onHitResult, isPaused }: BallsProp
   const positions = [-3.5, -1.2, 1.2, 3.5];
   const floorY = 0.4;
 
-  const [phase, setPhase] = useState<'serve' | 'return' | 'ended'>('serve');
-  const [ballZ, setBallZ] = useState(startZ);
-  const [hitIndex, setHitIndex] = useState(-1);
-  const [returnSpeedMult, setReturnSpeedMult] = useState(1.3);
-  const [hitZ, setHitZ] = useState(6);
+  const phaseRef = useRef<'serve' | 'return' | 'ended'>('serve');
+  const ballZRef = useRef(startZ);
+  const hitIndexRef = useRef(-1);
+  const returnSpeedMultRef = useRef(1.3);
+  const hitZRef = useRef(6);
 
   const ballYRef = useRef(floorY);
   const velocityYRef = useRef(0);
@@ -55,7 +55,7 @@ export default function Balls({ paddlePosRef, onHitResult, isPaused }: BallsProp
   };
 
   useFrame((_, delta) => {
-    if (phase === 'ended' || isPaused) return;
+    if (phaseRef.current === 'ended' || isPaused) return;
 
     const checkServeBounce = (prev: number, next: number) => {
       if ((prev <= -3 && next > -3) || (prev > -3 && next <= -3) ||
@@ -67,8 +67,8 @@ export default function Balls({ paddlePosRef, onHitResult, isPaused }: BallsProp
     const currentTargetZ = paddlePosRef.current.z;
     const paddlePower = paddlePosRef.current.vz;
 
-    if (phase === 'serve') {
-      let nextZ = ballZ + speed * delta;
+    if (phaseRef.current === 'serve') {
+      let nextZ = ballZRef.current + speed * delta;
 
       let hit = -1;
 
@@ -84,41 +84,40 @@ export default function Balls({ paddlePosRef, onHitResult, isPaused }: BallsProp
 
       if (hit !== -1) {
         nextZ = currentTargetZ;
-        setHitIndex(hit);
-        setHitZ(currentTargetZ);
-        // Dynamic hit calculation using exact mouse thrust power
+        hitIndexRef.current = hit;
+        hitZRef.current = currentTargetZ;
+        
         let bounceZ = -3;
-        let timeToBounce = 0.8; // default time in air
+        let timeToBounce = 0.8; 
 
-        if (paddlePower < -15) { // Smash (thrusting forward hard)
+        if (paddlePower < -15) { 
           bounceZ = -5.5;
-          timeToBounce = 0.3; // Very fast
-        } else if (paddlePower < -4) { // Fast drive
+          timeToBounce = 0.3; 
+        } else if (paddlePower < -4) { 
           bounceZ = -4.0;
           timeToBounce = 0.5;
-        } else if (paddlePower > 4) { // Drop shot (pulling backward)
-          bounceZ = -1.5; // Bounce just over the net (opponent side)
-          timeToBounce = 1.0; // Slower lob
+        } else if (paddlePower > 4) { 
+          bounceZ = -1.5; 
+          timeToBounce = 1.0; 
         }
 
         const distZ = currentTargetZ - bounceZ;
         const requiredSpeed = distZ / timeToBounce;
         const speedMult = requiredSpeed / speed;
 
-        setReturnSpeedMult(speedMult);
+        returnSpeedMultRef.current = speedMult;
         SoundManager.playHit();
 
-        // Physics initialization
         ballYRef.current = getServeY(currentTargetZ);
         velocityYRef.current = (floorY - ballYRef.current - 0.5 * gravity * timeToBounce * timeToBounce) / timeToBounce;
 
-        setPhase('return');
+        phaseRef.current = 'return';
       } else if (nextZ >= 7.5) {
-        setPhase('ended');
+        phaseRef.current = 'ended';
         onHitResult(-1);
       } else {
-        checkServeBounce(ballZ, nextZ);
-        setBallZ(nextZ);
+        checkServeBounce(ballZRef.current, nextZ);
+        ballZRef.current = nextZ;
       }
 
       if (meshRef.current) {
@@ -130,8 +129,8 @@ export default function Balls({ paddlePosRef, onHitResult, isPaused }: BallsProp
         }
         meshRef.current.instanceMatrix.needsUpdate = true;
       }
-    } else if (phase === 'return') {
-      let nextZ = ballZ - speed * delta * returnSpeedMult;
+    } else if (phaseRef.current === 'return') {
+      let nextZ = ballZRef.current - speed * delta * returnSpeedMultRef.current;
 
       velocityYRef.current += gravity * delta;
       let nextY = ballYRef.current + velocityYRef.current * delta;
@@ -145,22 +144,22 @@ export default function Balls({ paddlePosRef, onHitResult, isPaused }: BallsProp
 
       if (nextZ <= startZ) {
         nextZ = startZ;
-        setPhase('ended');
-        onHitResult(hitIndex);
+        phaseRef.current = 'ended';
+        onHitResult(hitIndexRef.current);
       } else {
-        setBallZ(nextZ);
+        ballZRef.current = nextZ;
       }
 
       if (meshRef.current) {
         for (let i = 0; i < positions.length; i++) {
-          if (i === hitIndex) {
+          if (i === hitIndexRef.current) {
             dummy.position.set(positions[i], ballYRef.current, nextZ);
             dummy.updateMatrix();
             meshRef.current.setMatrixAt(i, dummy.matrix);
           } else {
-            const t = (hitZ - nextZ) / (speed * returnSpeedMult);
+            const t = (hitZRef.current - nextZ) / (speed * returnSpeedMultRef.current);
             const dropY = floorY - 9.8 * t * t * 0.5;
-            dummy.position.set(positions[i], dropY, hitZ + t * speed * 0.5);
+            dummy.position.set(positions[i], dropY, hitZRef.current + t * speed * 0.5);
             dummy.updateMatrix();
             meshRef.current.setMatrixAt(i, dummy.matrix);
           }

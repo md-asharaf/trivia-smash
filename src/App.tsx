@@ -128,7 +128,7 @@ function App() {
             <>
               <div className="question-container">
                 <h2 className="question-text">
-                  What is the airline of <span className="highlight">{currentQuestion.country}</span>?
+                  {currentQuestionIndex + 1}. What is the airline of <span className="highlight">{currentQuestion.country}</span>?
                 </h2>
               </div>
               <div className="top-controls">
@@ -172,9 +172,9 @@ function App() {
         {currentQuestion && (
           <Canvas
             shadows
-            camera={{ 
-              position: isMobile ? [0, 16, 14] : [0, 9, 16], 
-              fov: isMobile ? 65 : 48 
+            camera={{
+              position: isMobile ? [0, 16, 14] : [0, 9, 16],
+              fov: isMobile ? 65 : 48
             }}
             onCreated={() => setIsCanvasLoaded(true)}
           >
