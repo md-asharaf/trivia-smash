@@ -68,7 +68,6 @@ function App() {
           return i + 1;
         } else {
           setIsGameOver(true);
-          triggerGameOverConfetti();
           return i;
         }
       });
@@ -84,32 +83,7 @@ function App() {
     });
   };
 
-  const triggerGameOverConfetti = () => {
-    const duration = 2000;
-    const end = Date.now() + duration;
 
-    const frame = () => {
-      confetti({
-        particleCount: 4,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.8 },
-        colors: ['#38bdf8', '#818cf8', '#c084fc', '#fbbf24']
-      });
-      confetti({
-        particleCount: 4,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.8 },
-        colors: ['#38bdf8', '#818cf8', '#c084fc', '#fbbf24']
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
-    frame();
-  };
 
   const currentQuestion = questions[currentQuestionIndex];
 
