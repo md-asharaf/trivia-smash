@@ -200,8 +200,23 @@ function App() {
         )}
 
         {showHintModal && currentQuestion?.hint && (
-          <div className="game-over-overlay" onClick={() => setShowHintModal(false)}>
-            <div className="game-over-modal" onClick={e => e.stopPropagation()}>
+          <div 
+            className="game-over-overlay" 
+            onClick={() => setShowHintModal(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') setShowHintModal(false);
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label="Close hint modal"
+          >
+            <div 
+              className="game-over-modal" 
+              onClick={e => e.stopPropagation()}
+              onKeyDown={e => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+            >
               <h2 className="game-over-title" style={{ fontSize: '2rem' }}>{currentQuestion.hint.label}</h2>
               <p style={{ fontSize: '1.2rem', color: '#fff', margin: '1rem 0' }}>{currentQuestion.hint.value}</p>
               <button className="play-again-btn" onClick={() => setShowHintModal(false)}>CLOSE</button>
