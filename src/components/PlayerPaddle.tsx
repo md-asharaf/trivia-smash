@@ -49,7 +49,6 @@ export default function PlayerPaddle({ onPositionUpdate, isPaused }: PlayerPaddl
       smoothedVelocityZRef.current *= 0.8;
     }
 
-    // Tilt paddle based on X position
     paddleRef.current.rotation.z = -paddleRef.current.position.x * 0.15;
 
     if (onPositionUpdate) {

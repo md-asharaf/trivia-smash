@@ -16,7 +16,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Glassmorphism Variables */
+
   --theme-main:   #00f2fe;
   --theme-dark:   #00a8cc;
   --theme-accent: #7c4dff;
@@ -200,10 +200,11 @@ body {
   transform: translate(-50%, -100%);
   text-align: center;
   width: max-content;
-  max-width: 110px;
+  max-width: min(250px, 40vw);
   display: flex;
   align-items: center;
   justify-content: center;
+  white-space: normal;
   word-wrap: break-word;
   animation: float 3s ease-in-out infinite;
   margin-bottom: 1rem;
@@ -268,6 +269,15 @@ body {
 
 .play-button:active {
   transform: scale(0.95);
+}
+
+.error-text {
+  color: #ef4444;
+  margin-top: 1rem;
+  font-weight: 600;
+  max-width: 80%;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 @keyframes slideDown {

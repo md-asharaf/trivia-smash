@@ -4,10 +4,10 @@ import Table from './Table';
 import PlayerPaddle from './PlayerPaddle';
 import Opponents from './Opponents';
 import Balls from './Balls';
-import { Question } from '../gameLogic';
+import { QuizQuestion } from '../types/api';
 
 interface GameSceneProps {
-  question: Question;
+  question: QuizQuestion;
   onAnswer: (selectedIndex: number) => void;
   isPaused?: boolean;
   isGameOver?: boolean;

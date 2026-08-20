@@ -2,7 +2,7 @@ import { Html } from '@react-three/drei';
 import Paddle from './Paddle';
 
 interface OpponentsProps {
-  options: string[];
+  options: readonly string[];
   isGameOver?: boolean;
 }
 

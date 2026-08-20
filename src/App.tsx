@@ -1,14 +1,19 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Trophy, Gem, Pause, Play, Volume2, VolumeX, RotateCcw } from 'lucide-react';
+import { Trophy, Gem, Pause, Play, Volume2, VolumeX, RotateCcw, HelpCircle } from 'lucide-react';
 import { GameScene } from './components/GameScene';
-import { generateQuestions, Question } from './gameLogic';
-import rawData from './public/data.json';
 import { SoundManager } from './sound';
 import confetti from 'canvas-confetti';
+import { fetchQuizData } from './api';
+import { QuizQuestion } from './types/api';
 
 function App() {
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [quizFetchState, setQuizFetchState] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [quizError, setQuizError] = useState<string>('');
+  const [showHintModal, setShowHintModal] = useState(false);
+  
+  const [hasStartedGame, setHasStartedGame] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -30,24 +35,47 @@ function App() {
     SoundManager.isMuted = isMuted;
   }, [isMuted]);
 
-  useEffect(() => {
-    setQuestions(generateQuestions(rawData, 10));
+  const loadQuizData = useCallback(async () => {
+    setQuizFetchState('loading');
+    setQuizError('');
+    try {
+      const data = await fetchQuizData();
+      setQuestions(data);
+      setQuizFetchState('done');
+    } catch (err: any) {
+      setQuizFetchState('error');
+      setQuizError(err.message || 'Failed to fetch quiz data');
+    }
   }, []);
 
+  const handleStartGameClick = () => {
+    if (quizFetchState === 'idle' || quizFetchState === 'error') {
+      loadQuizData();
+    }
+    setHasStartedGame(true);
+    setIsPaused(false);
+  };
+
   const resetGame = useCallback(() => {
-    setQuestions(generateQuestions(rawData, 10));
+    setHasStartedGame(false);
+    setQuizFetchState('idle');
+    setQuestions([]);
+    setIsCanvasLoaded(false);
+    setShowHintModal(false);
     setCurrentQuestionIndex(0);
     setScore(0);
     setStreak(0);
     setMaxStreak(0);
-    setIsPaused(false);
+    setIsPaused(true);
     setIsGameOver(false);
   }, []);
 
   const handleAnswer = useCallback((selectedIndex: number) => {
     const currentQuestion = questions[currentQuestionIndex];
     if (!currentQuestion) return;
-    const isCorrect = selectedIndex === currentQuestion.correctAnswerIndex;
+    
+    const selectedOption = currentQuestion.options[selectedIndex];
+    const isCorrect = selectedOption === currentQuestion.answer.value;
 
     if (isCorrect) {
       setScore(s => s + 10);
@@ -65,8 +93,10 @@ function App() {
       SoundManager.playLose();
       setFeedback({ type: 'wrong', key: Date.now() });
     }
+    
     setTimeout(() => {
       setFeedback(null);
+      setShowHintModal(false);
       setCurrentQuestionIndex(i => {
         if (i < questions.length - 1) {
           return i + 1;
@@ -87,29 +117,46 @@ function App() {
     });
   };
 
-
-
   const currentQuestion = questions[currentQuestionIndex];
+
+  const isGameReady = hasStartedGame && quizFetchState === 'done' && isCanvasLoaded;
 
   return (
     <div className="game-container">
-      {!isCanvasLoaded && (
-        <div className="loading-screen">
-          <div className="loader"></div>
-          <h2>Loading Game...</h2>
+      {(!hasStartedGame || !isGameReady) && (
+        <div className="start-screen">
+          <h1 className="title">TRIVIA SMASH</h1>
+          <button 
+            className="play-button" 
+            onClick={handleStartGameClick}
+            disabled={hasStartedGame && quizFetchState === 'loading'}
+            style={{ opacity: (hasStartedGame && quizFetchState === 'loading') ? 0.5 : 1 }}
+          >
+            {quizFetchState === 'error' ? 'Retry' : (
+              (hasStartedGame && (!isCanvasLoaded || quizFetchState !== 'done')) ? 'Loading...' : 'Start Game'
+            )}
+          </button>
+          {quizFetchState === 'error' && (
+            <p className="error-text">{quizError}</p>
+          )}
         </div>
       )}
 
-      {!isGameOver && isCanvasLoaded && (
+      {isGameReady && !isGameOver && (
         <div className="top-ui">
           {currentQuestion && (
             <>
               <div className="question-container">
                 <h2 className="question-text">
-                  {currentQuestionIndex + 1}. What is the airline of <span className="highlight">{currentQuestion.country}</span>?
+                  {currentQuestion.prompt.label}: <span className="highlight">{currentQuestion.prompt.value}</span>
                 </h2>
               </div>
               <div className="top-controls">
+                {currentQuestion.hint && (
+                  <button className="control-btn" onClick={() => setShowHintModal(true)} title="Show Hint">
+                    <HelpCircle size={24} />
+                  </button>
+                )}
                 <button className="control-btn" onClick={resetGame} title="New Game">
                   <RotateCcw size={24} />
                 </button>
@@ -126,7 +173,7 @@ function App() {
       )}
 
       <div className="canvas-container">
-        {feedback && (
+        {feedback && hasStartedGame && (
           <div key={feedback.key} className={`feedback-popup ${feedback.type}`}>
             {feedback.type === 'correct' ? '+10 CORRECT!' : '-5 WRONG!'}
           </div>
@@ -152,7 +199,17 @@ function App() {
           </div>
         )}
 
-        {currentQuestion && (
+        {showHintModal && currentQuestion?.hint && (
+          <div className="game-over-overlay" onClick={() => setShowHintModal(false)}>
+            <div className="game-over-modal" onClick={e => e.stopPropagation()}>
+              <h2 className="game-over-title" style={{ fontSize: '2rem' }}>{currentQuestion.hint.label}</h2>
+              <p style={{ fontSize: '1.2rem', color: '#fff', margin: '1rem 0' }}>{currentQuestion.hint.value}</p>
+              <button className="play-again-btn" onClick={() => setShowHintModal(false)}>CLOSE</button>
+            </div>
+          </div>
+        )}
+
+        {hasStartedGame && (
           <Canvas
             shadows
             camera={{
@@ -161,18 +218,20 @@ function App() {
             }}
             onCreated={() => setIsCanvasLoaded(true)}
           >
-            <GameScene
-              question={currentQuestion}
-              onAnswer={handleAnswer}
-              isPaused={isPaused}
-              isGameOver={isGameOver}
-              key={currentQuestionIndex}
-            />
+            {currentQuestion && (
+              <GameScene
+                question={currentQuestion}
+                onAnswer={handleAnswer}
+                isPaused={!isGameReady || isPaused}
+                isGameOver={isGameOver}
+                key={currentQuestionIndex}
+              />
+            )}
           </Canvas>
         )}
       </div>
 
-      {!isGameOver && isCanvasLoaded && (
+      {isGameReady && !isGameOver && (
         <div className="bottom-ui">
           {currentQuestion && (
             <div className="stats-container">

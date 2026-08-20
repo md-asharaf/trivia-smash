@@ -30,8 +30,7 @@ export class SoundManager {
       
       osc.start();
       osc.stop(ctx.currentTime + 0.05);
-    } catch (e) {
-      // Ignore audio context errors
+    } catch (error) {
     }
   }
 
@@ -57,7 +56,6 @@ export class SoundManager {
       osc.start();
       osc.stop(ctx.currentTime + 0.05);
     } catch (e) {
-      // Ignore
     }
   }
 

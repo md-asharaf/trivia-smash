@@ -11,8 +11,7 @@ export default function Table() {
         <meshStandardMaterial color="#e5e5e5" />
       </mesh>
 
-      {/* Center Line Vertical */}
-      <mesh position={[0, 0.12, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0, 0.061, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[0.1, 14]} />
         <meshStandardMaterial color="white" />
       </mesh>
